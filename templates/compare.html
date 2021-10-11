@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title> Compare </title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Raleway&display=swap" />
+
+        <style>
+            * {
+                font-family: "Raleway", Arial, Helvetica, sans-serif;
+            }
+        </style>
+    </head>
+    <nav class="navbar navbar-expand navbar-light" style="background-color: #095256; position:fixed; right:0;width: 100%; top:0;">
+      <div class="navbar-nav">
+      <p class="nav navbar-nav" style="float:left;"></p>
+      <a href=" {{ url_for('home') }}"><button>Home</button></a>
+      <a href="/stats"><button>Statistics</button></a>
+      <a href="/compare"><button>Compare</button></a>
+    </div>
+  </nav>
+  <br>
+  <br>
+    <body>
+      <datalist id="allCountries">
+        <option id ="United States">United States</option>
+        {% for x in allCountries %}
+        <option id = {{x}}>{{x}}</option>
+        {% endfor %}
+      </datalist>
+      <br>
+      <div style="text-align: center;">
+      <span><input name="country" id="country1" list="allCountries" autocomplete="off" style="width:25%; font-size:16px;"></span>
+      <span> vs. </span>
+      <span><input name="country" id="country2" list="allCountries" autocomplete="off" style="width:25%; font-size:16px;"></span>
+      </div>
+      <br>
+      <br>
+      <div style="text-align: center; width: 100%; display: table;">
+        <div style="display: table-row">
+            <div id = "timeGraph" style="width: 50%; display: table-cell;"></div>
+            <div id = "barGraph" style="width: 50%; display: table-cell;"></div>
+          </div>
+      </div>
+    </body>
+    <script src="http://d3js.org/d3.v5.js"
+      charset="utf-8"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+    <script src="static/compare.js"></script>
+</html>
