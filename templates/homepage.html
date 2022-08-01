@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        Welcome!
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Raleway&display=swap" />
+        <title> Homepage </title>
+
+        <style>
+            * {
+                font-family: "Raleway", Arial, Helvetica, sans-serif;
+            }
+        </style>
+    </head>
+    <nav class="navbar navbar-expand navbar-light" style="background-color: #095256; position:fixed; right:0;width: 100%; top:0;">
+      <div class="navbar-nav">
+      <p class="nav navbar-nav" style="float:left;"></p>
+      <a href=" {{ url_for('home') }}"><button>Home</button></a>
+      <a href="/stats"><button>Statistics</button></a>
+      <a href="/compare"><button>Compare</button></a>
+    </div>
+  </nav>
+    <body>
+      <br>
+      <div class="jumbotron jumbotron-fluid">
+  <div class="container">
+    <h1 class="display-4">CovidStats</h1>
+    <p class="lead">This project will be focusing on COVID-19. It will visualize statistics like the number of cases, deaths, and cures in the US and other countries both individually and in proportion to total population. There will be graphs to track growth of the virus in multiple countries as well as the ability to compare them.</p>
+  </div>
+</div>
+<div id = map style="width: 100%; text-align: center;">
+</div>
+<table style="width: 100%">
+    <tr>
+      <td>
+        <div id = lineGraphCountries>
+        </div>
+        <br>
+        <div id = percentGrowth>
+        </div>
+      </td>
+      <td>
+        <div id = rankedCircle>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <div id = lineGraphAggregated style="width: 100%; text-align: center;">
+  </div>
+    </body>
+    <script src="http://d3js.org/d3.v5.js"
+      charset="utf-8"></script>
+    <script src="https://cdn.jsdelivr.net/gh/holtzy/D3-graph-gallery@master/LIB/d3-scale-radial.js"></script>
+    <script src="https://d3js.org/topojson.v1.min.js"></script>
+    <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+    <script src="static/homepage.js"></script>
+</html>
