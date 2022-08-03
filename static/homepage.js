@@ -12,9 +12,13 @@ var margin = {top: 10, right: 30, bottom: 30, left: 100},
     innerRadius = 45,
     outerRadius = Math.min(width, height) / 2;
 
+/**
+ *  Draws the line graph of the eight most cases countries in one single graph for comparison.
+ */
 var lineGraphCountries = function(e){
-  var filteredData = []//new data array with only the specified country data
-  //needs a separate checker for United States because US is part of different csv
+  // data array with only the 8 specified country data and ignore the other unnecessary country datas.
+  var filteredData = []
+  // an array containing the data of the corresponding countries data entry in filteredData matched by index.
   var allDates = []
   d3.csv("static/data/key-countries-pivoted.csv").then(function(data){
     for (var i = 0; i < data.length; i++){
@@ -26,6 +30,8 @@ var lineGraphCountries = function(e){
                         Iran : data[i].Iran})
       allDates.push(d3.timeParse("%Y-%m-%d")(data[i].Date))
     }
+
+    // draws the graph with the x and y axises, marked with dates and number of cases respectively.
     var svg = d3.select("#lineGraphCountries")
       .append("svg")
         .attr("width", width + margin.left + margin.right + 50)
@@ -47,6 +53,7 @@ var lineGraphCountries = function(e){
     svg.append("g")
       .call(d3.axisLeft(y));
 
+    // draws the line in the graph for each eight countries.
     svg.append("path")
      .datum(filteredData)
      .attr("fill", "none")
@@ -120,6 +127,7 @@ var lineGraphCountries = function(e){
   .y(function(d) { return y(d.Iran) })
   )
 
+  // draws the legend key with color circles and corresponding country name next to it.
   svg.append("circle")
     .attr("cx",60).attr("cy",25).attr("r",8).style("fill", "red")
   svg.append("text").attr("x", 70).attr("y", 30).text("China").style("font-size", "15px").attr("alignment-baseline","middle")
@@ -145,6 +153,7 @@ var lineGraphCountries = function(e){
     .attr("cx",60).attr("cy",165).attr("r",8).style("fill", "gray")
   svg.append("text").attr("x", 70).attr("y", 170).text("Iran").style("font-size", "15px").attr("alignment-baseline","middle")
 
+  // adds a title to the graph.
   svg.append("text")
     .attr("x", (width / 2))
     .attr("y", 0 - (margin.top / 2))
@@ -153,6 +162,7 @@ var lineGraphCountries = function(e){
     .style("text-decoration", "underline")
     .text("Total Cases Over Time of Eight Countries with the Most Cases");
 
+  // labels the date x axis
   svg.append("text")
     .attr("x", (width / 2))
     .attr("y", height + margin.bottom + 5)
@@ -160,6 +170,7 @@ var lineGraphCountries = function(e){
     .style("font-size", "14px")
     .text("Date");
 
+  // labels the number of cases y axis
   svg.append("text")
     .attr("transform", "rotate(-90)")
     .attr("x", 0 - (height / 2))
@@ -171,9 +182,14 @@ var lineGraphCountries = function(e){
 
 }
 
+/**
+ *  Draws the line graph of the total cases aggregated worldwide.
+ */
 var lineGraphAggregated = function(e){
   var width = 1000
+  // data array with only the 8 specified country data and ignore the other unnecessary country datas.
   var filteredData = []
+  // an array containing the data of the corresponding countries data entry in filteredData matched by index.
   var allDates = []
   d3.csv("static/data/worldwide-aggregated.csv").then(function(data){
     for (var i = 0; i < data.length; i++){
@@ -182,6 +198,8 @@ var lineGraphAggregated = function(e){
                         Deaths : data[i].Deaths})
       allDates.push(d3.timeParse("%Y-%m-%d")(data[i].Date))
     }
+
+    // draws the graph with the x and y axises, marked with dates and number of cases respectively.
     var svg = d3.select("#lineGraphAggregated")
       .append("svg")
         .attr("width", width + margin.left + margin.right + 55)
@@ -201,7 +219,8 @@ var lineGraphAggregated = function(e){
       svg.append("g")
         .call(d3.axisLeft(y));
 
-      svg.append("path")
+    // draws the confirmed number of cases line.
+    svg.append("path")
      .datum(filteredData)
      .attr("fill", "none")
      .attr("stroke", "blue")
@@ -211,7 +230,8 @@ var lineGraphAggregated = function(e){
        .y(function(d) { return y(d.Confirmed) })
      )
 
-     svg.append("path")
+    // draws the recovered number of cases line.
+    svg.append("path")
     .datum(filteredData)
     .attr("fill", "none")
     .attr("stroke", "green")
@@ -221,6 +241,7 @@ var lineGraphAggregated = function(e){
       .y(function(d) { return y(d.Recovered) })
     )
 
+    // draws the death cases line.
     svg.append("path")
     .datum(filteredData)
     .attr("fill", "none")
@@ -231,6 +252,7 @@ var lineGraphAggregated = function(e){
      .y(function(d) { return y(d.Deaths) })
     )
 
+    // adds a label to the confirmed cases line with the same color blue.
     svg.append("text")
       .attr("transform", "translate(" + (width+3) + "," + y(Number(filteredData[filteredData.length -1].Confirmed)) + ")")
       .attr("dy", ".35em")
@@ -238,6 +260,7 @@ var lineGraphAggregated = function(e){
       .style("fill", "blue")
       .text("Confirmed");
 
+    // adds a label to the recovered cases line with the same color green.
     svg.append("text")
       .attr("transform", "translate(" + (width+3) + "," + y(Number(filteredData[filteredData.length -1].Recovered)) + ")")
       .attr("dy", ".35em")
@@ -245,6 +268,7 @@ var lineGraphAggregated = function(e){
       .style("fill", "green")
       .text("Recovered");
 
+    // adds a label to the death cases line with the same color red.
     svg.append("text")
       .attr("transform", "translate(" + (width+3) + "," + y(Number(filteredData[filteredData.length -1].Deaths)) + ")")
       .attr("dy", ".35em")
@@ -252,6 +276,7 @@ var lineGraphAggregated = function(e){
       .style("fill", "red")
       .text("Deaths");
 
+    // adds a title to the graph.
     svg.append("text")
       .attr("x", (width / 2))
       .attr("y", 0 - (margin.top / 2))
@@ -260,6 +285,7 @@ var lineGraphAggregated = function(e){
       .style("text-decoration", "underline")
       .text("Total Cases Aggregated Worldwide Over Time");
 
+    // labels the date x axis
     svg.append("text")
       .attr("x", (width / 2))
       .attr("y", height + margin.bottom + 5)
@@ -267,6 +293,7 @@ var lineGraphAggregated = function(e){
       .style("font-size", "14px")
       .text("Date");
 
+    // labels the number of cases y axis
     svg.append("text")
       .attr("transform", "rotate(-90)")
       .attr("x", 0 - (height / 2))
@@ -278,7 +305,11 @@ var lineGraphAggregated = function(e){
   })
 }
 
+/**
+ *  Draws the circular graph ranking the top 50 countries with the most cases.
+ */
 var rankedCircle = function(e){
+  // prepares the graph svg site
   var svg = d3.select("#rankedCircle")
   .append("svg")
     .attr("width", 400 + margin.left + margin.right)
@@ -287,14 +318,18 @@ var rankedCircle = function(e){
     .attr("transform", "translate(" + (300 / 2 + margin.left) + "," + (700 + margin.top) + ")");
 
   d3.csv("static/data/countries-aggregated.csv").then(function(data){
-    data = data.splice(17945)
-    data.splice(50)
-    console.log(data)
+    // only gets the data corresponding to the date 4/28/2020.
+    // TO-DO: looks for the date 4/28/2020 and get those entries instead of hard-coding
+    data.splice(17947)
+    // adds US data because US data is in a separate CSV file
     data.push({Country : "United States", Confirmed : 1360000})
+    // sorts the data
     data = data.sort(function (a, b) {
       return parseInt(b.Confirmed) - parseInt(a.Confirmed)
     });
-    //console.log(data)
+    // only gets the top 50 of the sorted data
+    data = data.splice(50)
+    
     var x = d3.scaleBand()
      .range([0, 2 * Math.PI])
      .align(0)
@@ -302,7 +337,6 @@ var rankedCircle = function(e){
     var y = d3.scaleRadial()
      .range([innerRadius, outerRadius])
      .domain([0, 14000]);
-
 
     svg.append("g")
      .selectAll("path")
@@ -337,7 +371,7 @@ var rankedCircle = function(e){
        .attr("text-anchor", "middle")
        .style("font-size", "16px")
        .style("text-decoration", "underline")
-       .text("Bar Graph of 50 Coutries with the Least Amount of Cases");
+       .text("Bar Graph of 50 Coutries with the Most Amount of Cases");
   })
 }
 
@@ -348,13 +382,6 @@ var mapWorld = function(e){
   ]).then(
   d => ready(null, d[0], d[1], d)
   );
-  // var promises = [
-  // d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson"),
-  // d3.csv("static/data/countries-aggregated.csv").then(function(d) {
-  //   //d = d.splice(17945)
-  //   mapData.set(d.Country, +d.Confirmed);
-  // })
-  // ]
 }
 
 function ready(error, data, confirmed, something){
@@ -393,7 +420,6 @@ function ready(error, data, confirmed, something){
       .attr('d', path)
       .style('fill', function(d){
         var value = confirmedByCountry[d.properties.name] || 0
-      //  console.log(d.properties.name)
         if (d.properties.name.localeCompare("USA") == 0){
           value = 1240000
         }
@@ -420,14 +446,12 @@ var percentGrowth = function(e){
   var filteredData = []
   var allDates = []
   d3.csv("static/data/worldwide-aggregated.csv").then(function(data){
-  //console.log(data)
     for (var i = 0; i < data.length; i++){
       filteredData.push({Date : d3.timeParse("%Y-%m-%d")(data[i].Date),
                         Growth : data[i]["Increase rate"]})
       allDates.push(d3.timeParse("%Y-%m-%d")(data[i].Date))
     }
   filteredData = filteredData.splice(1)
-  //console.log(filteredData)
     var svg = d3.select("#percentGrowth")
       .append("svg")
         .attr("width", width + margin.left + margin.right + 50)
@@ -479,6 +503,5 @@ var percentGrowth = function(e){
       .attr("text-anchor", "middle")
       .style("font-size", "14px")
       .text("Percentage (%)");
-
   })
 }
