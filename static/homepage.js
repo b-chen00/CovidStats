@@ -31,7 +31,7 @@ var lineGraphCountries = function(e){
       allDates.push(d3.timeParse("%Y-%m-%d")(data[i].Date))
     }
 
-    // draws the graph with the x and y axises, marked with dates and number of cases respectively.
+    // draws the graph container with the x and y axises, marked with dates and number of cases respectively.
     var svg = d3.select("#lineGraphCountries")
       .append("svg")
         .attr("width", width + margin.left + margin.right + 50)
@@ -199,7 +199,7 @@ var lineGraphAggregated = function(e){
       allDates.push(d3.timeParse("%Y-%m-%d")(data[i].Date))
     }
 
-    // draws the graph with the x and y axises, marked with dates and number of cases respectively.
+    // draws the graph container with the x and y axises, marked with dates and number of cases respectively.
     var svg = d3.select("#lineGraphAggregated")
       .append("svg")
         .attr("width", width + margin.left + margin.right + 55)
@@ -309,7 +309,7 @@ var lineGraphAggregated = function(e){
  *  Draws the circular graph ranking the bottom 50 countries with the least cases.
  */
 var rankedCircle = function(e){
-  // prepares the graph svg site
+  // prepares the graph svg container
   var svg = d3.select("#rankedCircle")
   .append("svg")
     .attr("width", 400 + margin.left + margin.right)
@@ -331,6 +331,7 @@ var rankedCircle = function(e){
     data.splice(50)
     console.log(data)
 
+    // draws the circular bargraph axis with the x axis being the circle from which bars are draw out form.
     var x = d3.scaleBand()
      .range([0, 2 * Math.PI])
      .align(0)
@@ -339,6 +340,7 @@ var rankedCircle = function(e){
      .range([innerRadius, outerRadius])
      .domain([0, 14000]);
 
+    // draws the country bars onto the graph
     svg.append("g")
      .selectAll("path")
      .data(data)
@@ -353,6 +355,7 @@ var rankedCircle = function(e){
            .padAngle(0.01)
            .padRadius(innerRadius))
 
+   // label each bar with the country name
    svg.append("g")
        .selectAll("g")
        .data(data)
@@ -366,6 +369,7 @@ var rankedCircle = function(e){
          .style("font-size", "11px")
        .attr("alignment-baseline", "middle")
 
+    // adds a title to the graph
     svg.append("text")
        .attr("x", 0)
        .attr("y", 0 - (1.30 * height))
@@ -376,6 +380,9 @@ var rankedCircle = function(e){
   })
 }
 
+/**
+ *  Gets world map data and aggregated cases data for graphing.
+ */
 var mapWorld = function(e){
   Promise.all([
   d3.json('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson'),
@@ -385,14 +392,19 @@ var mapWorld = function(e){
   );
 }
 
+/**
+ *  Draws and shades the world graph according to number of cases.
+ */
 function ready(error, data, confirmed, something){
   confirmed = confirmed.splice(17945)
   var confirmedByCountry = {}
   confirmed.forEach(d => { confirmedByCountry[d.Country] = + d.Confirmed})
   data.features.forEach(d => {d.Confirmed = confirmedByCountry[d.Country]})
 
-  console.log(confirmedByCountry)
+  // TO-DO: avoid hard-coding US data.
   confirmedByCountry["United States"] = 1000000
+
+  // creates the world map projection with borders drawn by var path and color scaled by the domain and shades of red.
   var projection = d3.geoRobinson()
     .scale(148)
     .rotate([352, 0, 0])
@@ -404,6 +416,7 @@ function ready(error, data, confirmed, something){
     ])
     .range(d3.schemeReds[5]);
 
+  // prepares the graph and svg container.
   var svg = d3.select("#map")
     .append("svg")
       .attr("width", width + margin.left + margin.right )
@@ -413,6 +426,7 @@ function ready(error, data, confirmed, something){
             "translate(" + 68.035 + "," + 2 * margin.top + ")")
     .attr('class','map');
 
+  // adds confirmed cases by country to world map with scaling.
   svg.append('g')
     .attr('class', 'countries')
     .selectAll('path')
@@ -424,6 +438,7 @@ function ready(error, data, confirmed, something){
         if (d.properties.name.localeCompare("USA") == 0){
           value = 1240000
         }
+        // returns the correct shade of red based on number of confirmed cases.
         return color(value)})
       .style('stroke', 'white')
       .style('opacity', 0.8)
@@ -433,6 +448,7 @@ function ready(error, data, confirmed, something){
     .attr('class', 'names')
     .attr('d', path);
 
+  // adds a title to the graph
   svg.append("text")
     .attr("x", (width / 2))
     .attr("y", 0 - (margin.top / 2))
@@ -442,17 +458,26 @@ function ready(error, data, confirmed, something){
     .text("World Map Scaled by the Amount of Confirmed Cases");
 }
 
-
+/**
+ *  Draws line graph that plots growth of total cases per week worldwide as a percentage of total cases.
+ */
 var percentGrowth = function(e){
+  // data array with only the 8 specified country data and ignore the other unnecessary country datas.
   var filteredData = []
+  // an array containing the data of the corresponding countries data entry in filteredData matched by index.
   var allDates = []
+
+  // reads the CSV file and grab only the needed date and growth data.
   d3.csv("static/data/worldwide-aggregated.csv").then(function(data){
     for (var i = 0; i < data.length; i++){
       filteredData.push({Date : d3.timeParse("%Y-%m-%d")(data[i].Date),
                         Growth : data[i]["Increase rate"]})
       allDates.push(d3.timeParse("%Y-%m-%d")(data[i].Date))
     }
+  // the first data entry does not have a increase rate due to not having a previous confirmed cases to go off of.
   filteredData = filteredData.splice(1)
+
+    // prepares the graph and svg container with appropriate axises.
     var svg = d3.select("#percentGrowth")
       .append("svg")
         .attr("width", width + margin.left + margin.right + 50)
@@ -472,7 +497,8 @@ var percentGrowth = function(e){
       svg.append("g")
         .call(d3.axisLeft(y));
 
-     svg.append("path")
+    // draws the growth line onto the graph.
+    svg.append("path")
     .datum(filteredData)
     .attr("fill", "none")
     .attr("stroke", "red")
@@ -482,6 +508,7 @@ var percentGrowth = function(e){
       .y(function(d) { return y(d.Growth) })
     )
 
+    // adds a title to the graph.
     svg.append("text")
       .attr("x", (width / 2))
       .attr("y", 0 - (margin.top / 2))
@@ -490,6 +517,7 @@ var percentGrowth = function(e){
       .style("text-decoration", "underline")
       .text("Percent Growth of Total Cases Worldwide (measured by Week) Over Time");
 
+    // adds a label to the x axis.
     svg.append("text")
       .attr("x", (width / 2))
       .attr("y", height + margin.bottom + 5)
@@ -497,6 +525,7 @@ var percentGrowth = function(e){
       .style("font-size", "14px")
       .text("Date");
 
+    // adds a label to the y axis.
     svg.append("text")
       .attr("transform", "rotate(-90)")
       .attr("x", 0 - (height / 2))
