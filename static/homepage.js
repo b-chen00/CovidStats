@@ -306,7 +306,7 @@ var lineGraphAggregated = function(e){
 }
 
 /**
- *  Draws the circular graph ranking the top 50 countries with the most cases.
+ *  Draws the circular graph ranking the bottom 50 countries with the least cases.
  */
 var rankedCircle = function(e){
   // prepares the graph svg site
@@ -320,16 +320,17 @@ var rankedCircle = function(e){
   d3.csv("static/data/countries-aggregated.csv").then(function(data){
     // only gets the data corresponding to the date 4/28/2020.
     // TO-DO: looks for the date 4/28/2020 and get those entries instead of hard-coding
-    data.splice(17947)
+    data = data.splice(17947)
     // adds US data because US data is in a separate CSV file
     data.push({Country : "United States", Confirmed : 1360000})
     // sorts the data
     data = data.sort(function (a, b) {
-      return parseInt(b.Confirmed) - parseInt(a.Confirmed)
+      return parseInt(a.Confirmed) - parseInt(b.Confirmed)
     });
     // only gets the top 50 of the sorted data
-    data = data.splice(50)
-    
+    data.splice(50)
+    console.log(data)
+
     var x = d3.scaleBand()
      .range([0, 2 * Math.PI])
      .align(0)
@@ -371,7 +372,7 @@ var rankedCircle = function(e){
        .attr("text-anchor", "middle")
        .style("font-size", "16px")
        .style("text-decoration", "underline")
-       .text("Bar Graph of 50 Coutries with the Most Amount of Cases");
+       .text("Bar Graph of 50 Coutries with the least Amount of Cases");
   })
 }
 
