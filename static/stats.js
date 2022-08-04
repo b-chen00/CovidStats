@@ -1,22 +1,22 @@
-// GRAPH VARIABLES
+// graph variables
 var margin = { top: 10, right: 30, bottom: 30, left: 100 },
     width = 1000 - margin.left - margin.right,
     height = 600 - margin.top - margin.bottom;
 
-// ANIM VARIABLES
+// animation variables
 var timeCounter;
 var id;
 var now, then, elapsed, fpsInterval;
 var fps = 20;
 
-// ADD EventListener TO SEARCH BAR
+// adds EventListener to search bar.
 var chosenCountry = document.getElementById("country")
 chosenCountry.addEventListener('input', function (e) { check(this) })
 
 var list = document.getElementById("allCountries")
 
 
-// Checks if input is a valid country
+// Checks if input is a valid country.
 function check(e) {
     for (var i = 0; i < list.childElementCount; i++) {
         if (list.children[i].value.localeCompare(e.value) == 0) {
@@ -27,25 +27,33 @@ function check(e) {
                 createBarGraphUS("US")
             }
             else {
+                // clears any previous graphs.
                 clear()
-                initTimeGraph(e.value) // e.value is the chosen country
-                createPopulationPie(e.value) // population vs confirmed pie chart
+                // creates the line graph showing confirmed cases over time.
+                // e.value is the chosen country.
+                initTimeGraph(e.value)
+                // creates the population relative to confirmed cases pie graph.
+                createPopulationPie(e.value)
+                // creates the bar graph showing confirmeed, recovered, and death cases.
                 createBarGraph(e.value)
             }
         }
     }
 }
+
+/**
+ *  Clears the page of all graphs.
+ */
 var clear = function (e) {
     timeCounter = 1;
     window.cancelAnimationFrame(id);
-
     d3.select('#timeGraph').selectAll('svg').remove();
     d3.select('#populationPie').selectAll('svg').remove();
     d3.select('#barGraph').selectAll('svg').remove();
 }
 
 
-// TIME GRAPH FUNCTIONS
+// time graph variables
 var initTimeDate = [];
 var timeData;
 var formatTimeData;
@@ -53,31 +61,41 @@ d3.csv("static/data/countries-aggregated.csv").then(function (data) {
     timeData = data;
 });
 
-// Limit FPS Source: https://stackoverflow.com/questions/19764018/controlling-fps-with-requestanimationframe
+/**
+ * Initializes and creates animated confirm cases over time graph.
+ * Controlling animation fps using source https://stackoverflow.com/questions/19764018/controlling-fps-with-requestanimationframe.
+ */
 function initTimeGraph(country) {
     formatTimeData = getTimeGraphData(country);
-
     fpsInterval = 1000 / fps;
+    // then variable stores time of last drawn frame
     then = Date.now();
-
+    // requests a frame
     id = window.requestAnimationFrame(animTimeGraph);
 }
-var animTimeGraph = function (e) {
-    // END OF GRAPH
-    if (timeCounter > timeData[1].length) return;
 
+/**
+ * Draws a frame of the time graph and recursively calls itself until all frames are drawn in the graph, thus completed.
+ */
+var animTimeGraph = function (e) {
+    // if all frames/data are drawn/animated then theres nothing left to animate, thus closing the loop by returning.
+    if (timeCounter > timeData[1].length) return;
+    // calculates the elapsed time since last loop/frame
     now = Date.now();
     elapsed = now - then;
     if (elapsed > fpsInterval) {
+        //removes previous frame and draws a new one with an updated time.
         d3.select('#timeGraph').selectAll('svg').remove();
         createTimeGraph(timeCounter++);
-
         then = now - (elapsed % fpsInterval);
     }
-
+    // calls itself to continue animating until all data/frames are animated
     id = window.requestAnimationFrame(animTimeGraph);
-    // d3.timeout(animTimeGraph, 50);
 }
+
+/**
+ * Gets and returns the data of a specified country for the time graph.
+ */
 function getTimeGraphData(country) {
     var data = timeData;
     var filteredData = [] // new data array with only the specified country data
@@ -88,11 +106,11 @@ function getTimeGraphData(country) {
     var allDeaths = []
 
     for (var i = 0; i < data.length; i++) {
-
+        // finds the data of the specified country.
         if (data[i].Country.localeCompare(country) == 0) {
             filteredData.push(data[i])
-            // Only timeparse the data on the first loop
-            // Will timeparse already parsed time if not done
+            // Only timeparse the data on the first loop.
+            // Will timeparse already parsed time if not done.
             if (initTimeDate.includes(country)) {
                 allDates.push((data[i].Date))
             }
@@ -106,23 +124,22 @@ function getTimeGraphData(country) {
         }
     }
     if (! initTimeDate.includes(country)) initTimeDate.push(country);
-
     return [filteredData, allDates, allCountries, allConfirmed, allRecovered, allDeaths];
 }
+
+/**
+ * Creates the time graph.
+ */
 function createTimeGraph(timeCounter) {
     var filteredData = formatTimeData[0];
     filteredData = filteredData.slice(0, timeCounter);
     var allDates = formatTimeData[1];
     allDates = allDates.slice(0, timeCounter);
-
-    //console.log(filteredData)
-    //console.log(allDates)
     for (i = 0; i < filteredData.length; i++) {
         filteredData[i].Date = allDates[i]
     }
-    //console.log(filteredData)
 
-    // CREATE SVG
+    // creates the graph and draws the axises.
     var svg = d3.select("#timeGraph")
         .append("svg")
         .attr("width", width + margin.left + margin.right + 55)
@@ -130,8 +147,6 @@ function createTimeGraph(timeCounter) {
         .append("g")
         .attr("transform",
             "translate(" + margin.left + "," + (2 * margin.top) + ")");
-
-    // CREATE AND ADD AXES TO GRAPH
     var xAxis = d3.scaleTime()
         .domain(d3.extent(allDates))
         .range([0, width]);
@@ -145,7 +160,7 @@ function createTimeGraph(timeCounter) {
     svg.append("g")
         .call(d3.axisLeft(yAxis));
 
-    // ADD LINES
+    // draws the line
     svg.append("path")
         .datum(filteredData)
         .attr("fill", "none")
@@ -176,7 +191,7 @@ function createTimeGraph(timeCounter) {
             .y(function (d) { return yAxis(d.Deaths) })
         )
 
-    // ADD TEXT LABELS
+    // adds a label to the confirmed cases line.
     svg.append("text")
         .attr("transform", "translate(" + (width + 3) + "," + yAxis(Number(filteredData[filteredData.length - 1].Confirmed)) + ")")
         .attr("dy", ".35em")
@@ -184,6 +199,7 @@ function createTimeGraph(timeCounter) {
         .style("fill", "blue")
         .text("Confirmed");
 
+    // adds a label to the recovered cases line.
     svg.append("text")
         .attr("transform", "translate(" + (width + 3) + "," + yAxis(Number(filteredData[filteredData.length - 1].Recovered)) + ")")
         .attr("dy", ".35em")
@@ -191,6 +207,7 @@ function createTimeGraph(timeCounter) {
         .style("fill", "green")
         .text("Recovered");
 
+    // adds a label to the death cases line.
     svg.append("text")
         .attr("transform", "translate(" + (width + 3) + "," + yAxis(Number(filteredData[filteredData.length - 1].Deaths)) + ")")
         .attr("dy", ".35em")
@@ -198,6 +215,7 @@ function createTimeGraph(timeCounter) {
         .style("fill", "red")
         .text("Deaths");
 
+    // adds a title to the graph.
     svg.append("text")
         .attr("x", (width / 2))
         .attr("y", 0 - (margin.top / 2))
@@ -206,6 +224,7 @@ function createTimeGraph(timeCounter) {
         .style("text-decoration", "underline")
         .text("Number of Cases Over Time");
 
+    // adds a label to the x axis.
     svg.append("text")
         .attr("x", (width / 2))
         .attr("y", height + margin.bottom + 5)
@@ -213,6 +232,7 @@ function createTimeGraph(timeCounter) {
         .style("font-size", "14px")
         .text("Date");
 
+    // adds a label to the y axis.
     svg.append("text")
         .attr("transform", "rotate(-90)")
         .attr("x", 0 - (height / 2))
@@ -220,7 +240,6 @@ function createTimeGraph(timeCounter) {
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
         .text("Total Number of Cases");
-    //console.log(filteredData)
 }
 
 var initTimeUS = true;
@@ -230,6 +249,10 @@ d3.csv("static/data/key-countries-pivoted.csv").then(function (data) {
     timeDataUS = data;
 });
 
+/**
+ * Gets and returns the data of US for the time graph.
+ * Operates similarly to initTimeGraph().
+ */
 function initTimeGraphUS() {
     if (initTimeUS) {
         formatTimeDataUS = getTimeGraphDataUS();
@@ -241,52 +264,57 @@ function initTimeGraphUS() {
 
     id = window.requestAnimationFrame(animTimeGraphUS);
 }
-function animTimeGraphUS() {
-    // END OF GRAPH
-    if (timeCounter > timeDataUS[1].length) return;
 
+/**
+ * Draws a frame of the time graph and recursively calls itself until all frames are drawn in the graph, thus completed.
+ * Operates similarly to animTimeGraph() except for the US.
+ */
+function animTimeGraphUS() {
+    if (timeCounter > timeDataUS[1].length) return;
     now = Date.now();
     elapsed = now - then;
     if (elapsed > fpsInterval) {
         d3.select('#timeGraph').selectAll('svg').remove();
         createTimeGraphUS(timeCounter++);
-
         then = now - (elapsed % fpsInterval);
     }
-
     id = window.requestAnimationFrame(animTimeGraphUS);
-    //d3.timeout(animTimeGraphUS, 50);
 }
+
+/**
+ * Draws a frame of the time graph and recursively calls itself until all frames are drawn in the graph, thus completed.
+ * Operates similarly to getTimeGraphData().
+ */
 function getTimeGraphDataUS() {
-    var data = timeDataUS;
-    var filteredData = [] // new data array with only the specified country data
     // needs a separate checker for United States because US is part of different csv
+    var data = timeDataUS;
+    var filteredData = []
     var allDates = []
     var allUSConfirmed = []
-
     for (var i = 0; i < data.length; i++) {
         allDates.push(d3.timeParse("%Y-%m-%d")(data[i].Date))
         allUSConfirmed.push({ Date: data[i] }.US)
         filteredData.push(data[i])
     }
-
     return [filteredData, allDates, allUSConfirmed];
 }
+
+/**
+ * Creates the time graph for US.
+ * Operates similarly to createTimeGraph().
+ */
 function createTimeGraphUS(timeCounter) {
-    var filteredData = formatTimeDataUS[0]; //new data array with only the specified country data. Needs a separate checker for United States because US is part of different csv
+    var filteredData = formatTimeDataUS[0];
     filteredData = filteredData.slice(0, timeCounter);
     var allDates = formatTimeDataUS[1];
     allDates = allDates.slice(0, timeCounter);
     var allUSConfirmed = formatTimeDataUS[2]
 
-    //console.log(filteredData)
-    //console.log(allDates)
     for (i = 0; i < filteredData.length; i++) {
         filteredData[i].Date = allDates[i]
     }
-    //console.log(filteredData)
 
-    // CREATE SVG
+    // create svg.
     var svg = d3.select("#timeGraph")
         .append("svg")
         .attr("width", width + margin.left + margin.right + 50)
@@ -295,7 +323,7 @@ function createTimeGraphUS(timeCounter) {
         .attr("transform",
             "translate(" + margin.left + "," + 2 * margin.top + ")");
 
-    // CREATE AND ADD AXES TO GRAPH
+    // create and add axises to graph.
     var xAxis = d3.scaleTime()
         .domain(d3.extent(allDates))
         .range([0, width]);
@@ -309,7 +337,7 @@ function createTimeGraphUS(timeCounter) {
     svg.append("g")
         .call(d3.axisLeft(yAxis));
 
-    // ADD LINES
+    // add lines.
     svg.append("path")
         .datum(filteredData)
         .attr("fill", "none")
@@ -320,7 +348,7 @@ function createTimeGraphUS(timeCounter) {
             .y(function (d) { return yAxis(d.US) })
         )
 
-    // ADD LABELS
+    // add labels.
     svg.append("text")
         .attr("transform", "translate(" + (width + 3) + "," + yAxis(Number(parseInt(filteredData[filteredData.length - 1].US))) + ")")
         .attr("dy", ".35em")
@@ -350,11 +378,11 @@ function createTimeGraphUS(timeCounter) {
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
         .text("Total Number of Cases");
-    //console.log(filteredData)
 }
 
-
-// PIE GRAPH FUNCTIONS
+/**
+ * Creates the population pie chart.
+ */
 function createPopulationPie(e) {
     var width = 450
     var height = 450
@@ -362,6 +390,7 @@ function createPopulationPie(e) {
 
     var radius = Math.min(width, height) / 2 - margin
 
+    // creates the graph svg.
     var svg = d3.select("#populationPie")
         .append("svg")
         .attr("width", width)
@@ -369,6 +398,7 @@ function createPopulationPie(e) {
         .append("g")
         .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
+    // adds a title to the graph.
     svg.append("text")
         .attr("x", 0)
         .attr("y", 0 - height / 2.25)
@@ -382,18 +412,19 @@ function createPopulationPie(e) {
     var latestNumOfConfirmed = 0
     var allConfirmedDays = []
 
+    // extract the data from the CSV files.
     d3.csv("static/data/reference.csv").then(function (data) {
-        var found = false;//reference.csv includes state/province population so we
-        //only need the first match which is total population
+        //reference.csv includes state/province population so we only need the first match which is total population
+        // gets total population data.
+        var found = false;
         for (var i = 0; i < data.length; i++) {
             if (e.localeCompare(data[i].Country_Region) == 0 && !found) {
                 population = data[i].Population
-                //console.log(population)
                 found = true
             }
         }
 
-
+        // gets confirmed cases data.
         d3.csv("static/data/countries-aggregated.csv").then(function (data) {
             for (var i = 0; i < data.length; i++) {
                 if (data[i].Country.localeCompare(e) == 0) {
@@ -403,10 +434,10 @@ function createPopulationPie(e) {
             latestNumOfConfirmed = allConfirmedDays[allConfirmedDays.length - 1]
             var pieData = { Healthy: population - latestNumOfConfirmed, Confirmed: parseInt(latestNumOfConfirmed) }
 
+            // creates the pie chart from the data using the two specified colors.
             var color = d3.scaleOrdinal()
                 .domain(pieData)
                 .range(["#73c378", "#f9694c"]);
-
             var pie = d3.pie()
                 .value(function (d) { return d.value; })
             var data_ready = pie(d3.entries(pieData))
@@ -431,15 +462,14 @@ function createPopulationPie(e) {
                 .attr("transform", function (d) { return "translate(" + arcGenerator.centroid(d) + ")"; })
                 .style("text-anchor", "middle")
                 .style("font-size", 17)
-
-
         })
     })
-
-
-
 }
 
+/**
+ * Creates the population pie chart for the US.
+ * Operates similarly to createPopulationPie().
+ */
 function createPopulationPieUS(e) {
     var width = 450
     var height = 450
@@ -459,12 +489,10 @@ function createPopulationPieUS(e) {
     var allConfirmedDays = []
 
     d3.csv("static/data/reference.csv").then(function (data) {
-        var found = false;//reference.csv includes state/province population so we
-        //only need the first match which is total population
+        var found = false;
         for (var i = 0; i < data.length; i++) {
             if (e.localeCompare(data[i].Country_Region) == 0 && !found) {
                 population = data[i].Population
-                //console.log(population)
                 found = true
             }
         }
@@ -519,8 +547,11 @@ function createPopulationPieUS(e) {
 }
 
 
-// BAR GRAPH FUNCTIONS
+/**
+ * Creates a bar graph for a specified country showing number of confirmed, recovered, and death cases.
+ */
 function createBarGraph(e) {
+    // creates the graph svg.
     var width = 550
     var height = 450
     var x = d3.scaleBand()
@@ -528,7 +559,6 @@ function createBarGraph(e) {
         .padding(0.1);
     var y = d3.scaleLinear()
         .range([height, 0]);
-
     var svg = d3.select("#barGraph").append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + (2 * (margin.top + margin.bottom)))
@@ -537,18 +567,17 @@ function createBarGraph(e) {
             "translate(" + margin.left + "," + (2 * margin.top) + ")");
 
     d3.csv("static/data/countries-aggregated.csv").then(function (data) {
-        var filteredData = []//getting all rows with the specified country
+        //gets all rows related the specified country.
+        var filteredData = []
         for (var i = 0; i < data.length; i++) {
             if (data[i].Country.localeCompare(e) == 0) {
                 filteredData.push(data[i])
             }
         }
-
         filteredData = [filteredData[filteredData.length - 1]]
         filteredData = [{ Category: "Confirmed", number: filteredData[0].Confirmed },
         { Category: "Recovered", number: filteredData[0].Recovered },
         { Category: "Deaths", number: filteredData[0].Deaths }]
-
         var allCategory = []
         var allNumbers = []
         for (var i = 0; i < filteredData.length; i++) {
@@ -559,15 +588,14 @@ function createBarGraph(e) {
         x.domain(filteredData.map(function (d) { return d.Category; }));
         y.domain([0, d3.max(filteredData, function (d) { return +d.number; })]);
 
-        console.log(filteredData[0].number)
-
+        // draws the axises.
         svg.append("g")
             .attr("transform", "translate(0," + height + ")")
             .call(d3.axisBottom(x));
-
         svg.append("g")
             .call(d3.axisLeft(y));
 
+        // draws the bars.
         svg.selectAll(".bar")
             .data(filteredData)
             .enter().append("rect")
@@ -580,6 +608,8 @@ function createBarGraph(e) {
             .duration(1000)
             .attr("y", function (d) { return y(Number(d.number)); })
             .attr("height", function (d) { return height - y(Number(d.number)); });
+
+        // adds a title to the graph.
         svg.append("text")
             .attr("x", (width / 2))
             .attr("y", 0 - (margin.top / 2))
@@ -588,6 +618,7 @@ function createBarGraph(e) {
             .style("text-decoration", "underline")
             .text("Comparison between the Types of Cases in " + e);
 
+        // adds a label to the x axis.
         svg.append("text")
             .attr("x", (width / 2))
             .attr("y", height + margin.bottom + 1)
@@ -595,6 +626,7 @@ function createBarGraph(e) {
             .style("font-size", "14px")
             .text("Types of Cases");
 
+        // adds a label to the y axis.
         svg.append("text")
             .attr("transform", "rotate(-90)")
             .attr("x", 0 - (height / 2))
@@ -605,6 +637,10 @@ function createBarGraph(e) {
     })
 }
 
+/**
+ * Creates a bar graph for the US showing number of confirmed, recovered, and death cases.
+ * Operates similarly to createBarGraph().
+ */
 function createBarGraphUS(e) {
     var width = 550
     var height = 450
