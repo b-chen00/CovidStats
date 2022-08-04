@@ -13,11 +13,17 @@ var list = document.getElementById("allCountries")
 var country1;
 var country2;
 
+/**
+ * Clears the page of all graphs to make space for new ones.
+ */
 var clear = function (e) {
     d3.select('#timeGraph').selectAll('svg').remove();
     d3.select('#barGraph').selectAll('svg').remove();
 }
 
+/**
+ * Checks the left input for what country and places it in the variable country1.
+ */
 var check1 = function (e) {
     for (var i = 0; i < list.childElementCount; i++) {
         if (list.children[i].value.localeCompare(e.value) == 0) {
@@ -36,6 +42,9 @@ var check1 = function (e) {
 
 }
 
+/**
+ * Checks the left input for what country and places it in the variable country1.
+ */
 var check2 = function (e) {
     for (var i = 0; i < list.childElementCount; i++) {
         if (list.children[i].value.localeCompare(e.value) == 0) {
@@ -53,6 +62,9 @@ var check2 = function (e) {
     }
 }
 
+/**
+ * Sets up the compare page by drawing the two graph once the two countries are chosen.
+ */
 var draw = function (e) {
     if (country1 != undefined && country2 != undefined) {
         if (country1.localeCompare("United States") == 0 || country2.localeCompare("United States") == 0) {
@@ -66,10 +78,11 @@ var draw = function (e) {
     }
 }
 
-
+/**
+ * Draws the line graph with two lines to compare two countries.
+ */
 var lineGraph = function (e) {
-    var filteredData1 = []//new data array with only the specified country data
-    //needs a separate checker for United States because US is part of different csv
+    var filteredData1 = []
     var filteredData2 = []
     var allDates1 = []
     var allDates2 = []
@@ -77,6 +90,7 @@ var lineGraph = function (e) {
     var c2 = country2;
 
     d3.csv("static/data/countries-aggregated.csv").then(function (data) {
+        // gets and process the data from the CSV files.
         for (var i = 0; i < data.length; i++) {
             if (data[i].Country.localeCompare(c1) == 0) {
                 filteredData1.push(data[i])
@@ -89,8 +103,6 @@ var lineGraph = function (e) {
                 allDates2.push(d3.timeParse("%Y-%m-%d")(data[i].Date))
             }
         }
-        //console.log(filteredData)
-        //console.log(allDates)
         for (i = 0; i < filteredData1.length; i++) {
             filteredData1[i].Date = allDates1[i]
         }
@@ -107,6 +119,8 @@ var lineGraph = function (e) {
             allDates1 = allDates2
             allDates2 = temp2
         }
+
+        // sets up the graph svg and axises.
         var svg = d3.select("#timeGraph")
             .append("svg")
             .attr("width", width + margin.left + margin.right + 60)
@@ -115,20 +129,19 @@ var lineGraph = function (e) {
             .append("g")
             .attr("transform",
                 "translate(" + margin.left + "," + 2 * margin.top + ")");
-
         var x = d3.scaleTime()
             .domain(d3.extent(allDates1))
             .range([0, width]);
         svg.append("g")
             .attr("transform", "translate(0," + height + ")")
             .call(d3.axisBottom(x));
-
         var y = d3.scaleLinear()
             .domain([0, d3.max(filteredData1, function (d) { return +d.Confirmed; })])
             .range([height, 0]);
         svg.append("g")
             .call(d3.axisLeft(y));
 
+        // plots the lines for each country with different colors.
         svg.append("path")
             .datum(filteredData1)
             .attr("fill", "none")
@@ -138,7 +151,6 @@ var lineGraph = function (e) {
                 .x(function (d) { return x(d.Date) })
                 .y(function (d) { return y(d.Confirmed) })
             )
-
         svg.append("path")
             .datum(filteredData2)
             .attr("fill", "none")
@@ -149,6 +161,7 @@ var lineGraph = function (e) {
                 .y(function (d) { return y(d.Confirmed) })
             )
 
+        // adds a title to the graph.
         svg.append("text")
             .attr("x", (width / 2))
             .attr("y", 0 - (margin.top / 2))
@@ -157,6 +170,7 @@ var lineGraph = function (e) {
             .style("text-decoration", "underline")
             .text("Total Cases of " + c1 + " and " + c2 + " over Time");
 
+        // adds a label to the x axis.
         svg.append("text")
             .attr("x", (width / 2))
             .attr("y", height + margin.bottom + 5)
@@ -164,6 +178,7 @@ var lineGraph = function (e) {
             .style("font-size", "14px")
             .text("Date");
 
+        // adds a label to the y axis.
         svg.append("text")
             .attr("transform", "rotate(-90)")
             .attr("x", 0 - (height / 2))
@@ -172,6 +187,8 @@ var lineGraph = function (e) {
             .style("font-size", "14px")
             .text("Number of Cases");
 
+        // creates a "curtain" or a rectangle that shrinks from left to right which creates an illusion of the line being animated or generated.
+        // this is a curtain in the sense that the line is revealed from left to right.
         var curtain = svg.append("rect")
             .attr('x', -1 * width)
             .attr('y', -1 * height)
@@ -180,35 +197,38 @@ var lineGraph = function (e) {
             .attr('id', 'curtain')
             .attr('transform', 'rotate(180)')
             .style('fill', '#FFFFFF');
-
         d3.select("rect").transition()
             .duration(1000)
             .ease(d3.easeLinear)
             .attr("x", width * -2 - 100)
             .on("end", label);
 
+        // adds a label to each line with their corresponding color.
         function label() {
             svg.append("text")
-            .attr("transform", "translate(" + (width + 3) + "," + y(Number(filteredData1[filteredData1.length - 1].Confirmed)) + ")")
-            .attr("dy", ".35em")
-            .attr("text-anchor", "start")
-            .style("fill", "blue")
-            .text(filteredData1[0].Country);
-
-        svg.append("text")
-            .attr("transform", "translate(" + (width + 3) + "," + y(Number(filteredData2[filteredData2.length - 1].Confirmed)) + ")")
-            .attr("dy", ".35em")
-            .attr("text-anchor", "start")
-            .style("fill", "red")
-            .text(filteredData2[0].Country);
+              .attr("transform", "translate(" + (width + 3) + "," + y(Number(filteredData1[filteredData1.length - 1].Confirmed)) + ")")
+              .attr("dy", ".35em")
+              .attr("text-anchor", "start")
+              .style("fill", "blue")
+              .text(filteredData1[0].Country);
+          svg.append("text")
+              .attr("transform", "translate(" + (width + 3) + "," + y(Number(filteredData2[filteredData2.length - 1].Confirmed)) + ")")
+              .attr("dy", ".35em")
+              .attr("text-anchor", "start")
+              .style("fill", "red")
+              .text(filteredData2[0].Country);
         }
     })
-    //console.log(filteredData)
 }
 
+/**
+ * Draws the line graph with two lines to compare two countries.
+ * Operates similarly to lineGraph().
+ */
 var lineGraphUS = function (e) {
     var c1;
     var c2;
+    // if the United States is present then it always needs to be in the c1 variable for consistency.
     if (country2.localeCompare("United States") == 0) {
         c1 = country2
         c2 = country1
@@ -217,24 +237,22 @@ var lineGraphUS = function (e) {
         c1 = country1
         c2 = country2
     }
-    var filteredData1 = []//new data array with only the specified country data
-    //needs a separate checker for United States because US is part of different csv
+
+    var filteredData1 = []
     var allDates1 = []
     var allUSConfirmed1 = []
     d3.csv("static/data/key-countries-pivoted.csv").then(function (data) {
-
+        // US date is stored in a different CSV file.
         for (var i = 0; i < data.length; i++) {
             allDates1.push(d3.timeParse("%Y-%m-%d")(data[i].Date))
             allUSConfirmed1.push({ Date: data[i] }.US)
             filteredData1.push(data[i])
         }
 
-        //console.log(filteredData)
-        //console.log(allDates)
         for (var i = 0; i < filteredData1.length; i++) {
             filteredData1[i].Date = allDates1[i]
         }
-        //console.log(filteredData)
+
         var svg = d3.select("#timeGraph")
             .append("svg")
             .attr("width", width + margin.left + margin.right + 70)
@@ -280,7 +298,6 @@ var lineGraphUS = function (e) {
                 for (var i = 0; i < data2.length; i++) {
                     if (data2[i].Country.localeCompare(c2) == 0) {
                         filteredData2.push(data2[i])
-                        //console.log(data2[i])
                         allDates2.push(d3.timeParse("%Y-%m-%d")(data2[i].Date))
                     }
                 }
@@ -320,7 +337,7 @@ var lineGraphUS = function (e) {
             .duration(1000)
             .ease(d3.easeLinear)
             .attr("x", width * -2 - 100);
-        
+
         svg.append("text")
             .attr("x", (width / 2))
             .attr("y", 0 - (margin.top / 2))
@@ -346,7 +363,11 @@ var lineGraphUS = function (e) {
     })
 }
 
+/**
+ * Draws the bar graph with two lines to compare two countries.
+ */
 var barGraph = function (e) {
+    // creates the graph svg.
     var svg = d3.select("#barGraph")
         .append("svg")
         .attr("width", width + margin.left + margin.right)
@@ -381,12 +402,10 @@ var barGraph = function (e) {
         refilteredData.push(filteredData1[filteredData1.length - 1])
         refilteredData.push(filteredData2[filteredData2.length - 1])
 
-        console.log(filteredData1)
-        console.log(filteredData2)
-
         var subgroups = data.columns.slice(2)
         var groups = d3.map(refilteredData, function (d) { return (d.Country) }).keys()
 
+        // sets up the axises and sub-groups of bars with different colors within those sub-groups to represent cases.
         var x = d3.scaleBand()
             .domain(groups)
             .range([0, width])
@@ -410,6 +429,7 @@ var barGraph = function (e) {
             .domain(subgroups)
             .range(['#e41a1c', '#377eb8', '#4daf4a'])
 
+        // adds the data to the graph as groups of bars of varying heights.
         svg.append("g")
             .selectAll("g")
             .data(refilteredData)
@@ -423,10 +443,13 @@ var barGraph = function (e) {
             .attr("y", function (d) { return y(0); })
             .attr("width", xSubgroup.bandwidth())
             .attr("fill", function (d) { return color(d.key); });
+        // animates the bars
         svg.selectAll("rect").transition()
             .duration(1000)
             .attr("height", function (d) { return height - y(d.value); })
             .attr("y", function (d) { return y(d.value); })
+
+        // adds a title to the graph.
         svg.append("text")
             .attr("x", (width / 2))
             .attr("y", 0 - (margin.top / 2))
@@ -435,6 +458,7 @@ var barGraph = function (e) {
             .style("text-decoration", "underline")
             .text("Comparison between the Types of Cases of the Two Countries");
 
+        // adds a label to the x axis.
         svg.append("text")
             .attr("x", (width / 2))
             .attr("y", height + margin.bottom + 1)
@@ -442,6 +466,7 @@ var barGraph = function (e) {
             .style("font-size", "14px")
             .text("Country");
 
+        // adds a label to the y axis.
         svg.append("text")
             .attr("transform", "rotate(-90)")
             .attr("x", 0 - (height / 2))
@@ -450,7 +475,7 @@ var barGraph = function (e) {
             .style("font-size", "14px")
             .text("Number of Cases");
 
-
+        // adds a label to the legend key
         var c = ["Confirmed", "Recovered", "Deaths"]
         var legend = svg.selectAll(".legend")
             .data(c)
@@ -459,12 +484,14 @@ var barGraph = function (e) {
             .attr("transform", function (d, i) { return "translate(0," + i * 20 + ")"; })
             .style("opacity", "100");
 
+        // creates the square in the legend key to show the meaning of each color of bars.
         legend.append("rect")
             .attr("x", width - 18)
             .attr("width", 18)
             .attr("height", 18)
             .style("fill", function (d) { return color(d); });
-
+            
+        // adds the correct color to the legend key.
         legend.append("text")
             .attr("x", width - 24)
             .attr("y", 9)
@@ -475,6 +502,10 @@ var barGraph = function (e) {
 
 }
 
+/**
+ * Draws the bar graph with two lines to compare two countries, one of which is the US.
+ * Operates similarly to barGraph().
+ */
 var barGraphUS = function (e) {
     var svg = d3.select("#barGraph")
         .append("svg")
@@ -509,8 +540,6 @@ var barGraphUS = function (e) {
         if (c2.localeCompare("United States") == 0) {
             var subgroups = ['Confirmed', 'Recovered', 'Deaths']
             var groups = d3.map(refilteredData, function (d) { return (d.Country) }).keys()
-            console.log(subgroups)
-            console.log(groups)
             var x = d3.scaleBand()
                 .domain(groups)
                 .range([0, width])
@@ -582,8 +611,6 @@ var barGraphUS = function (e) {
                 refilteredData.push(filteredData2[filteredData2.length - 1])
                 var subgroups = moreData.columns.slice(2)
                 var groups = d3.map(refilteredData, function (d) { return (d.Country) }).keys()
-                console.log(subgroups)
-                console.log(groups)
                 var x = d3.scaleBand()
                     .domain(groups)
                     .range([0, width])

@@ -551,7 +551,7 @@ function createPopulationPieUS(e) {
  * Creates a bar graph for a specified country showing number of confirmed, recovered, and death cases.
  */
 function createBarGraph(e) {
-    // creates the graph svg.
+    // creates the graph svg and sets up the axises.
     var width = 550
     var height = 450
     var x = d3.scaleBand()
