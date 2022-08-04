@@ -14,12 +14,12 @@ Python3 and pip is required to run the project
 [Download Python3 here](https://www.python.org/downloads/) (pip3 comes with python3 download)
 requirements can be found in doc/requirements.txt
 
-### Clone instructions
-`$ git clone https://github.com/b-chen00/CovidStats.git`  
-
 ### Run the project:
-cd into the cloned repo and run:
-`$ python3 app.py`  
+1. Create a virtual environment with `python3 -m venv <virtual-environment-name>`.
+2. Use '<virtual-environment-name>/Scripts/activate' to activate your virtual environment. Use 'source <virtual-environment-name>/Scripts/activate' for Git Bash.
+3. Clone this project and 'cd' into the cloned repository.
+4. Use 'python3 app.py' to run the project on your local host.
+5. Go to the url listed as the local host.  
 
 # To-do
 - Fix/improve 50 lowest confirmed cases country graph on the homepage.
