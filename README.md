@@ -20,3 +20,8 @@ requirements can be found in doc/requirements.txt
 ### Run the project:
 cd into the cloned repo and run:
 `$ python3 app.py`  
+
+### To-do
+- Fix/improve 50 lowest confirmed cases country graph on the homepage.
+  - Currently has too much space for a small graph.
+  - Could convert to 50 highest confirmed cases but certain countries massively skews the graph.
