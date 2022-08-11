@@ -10,9 +10,9 @@ statistics for confirmed cases, total deaths, new cases, and total population.
 
 ## How to Run the Project:  
 ### Requirements:
-Python3 and pip is required to run the project  
-[Download Python3 here](https://www.python.org/downloads/) (pip3 comes with python3 download)
-requirements can be found in doc/requirements.txt
+Python3 and pip is required to run the project.  
+[Download Python3 here.](https://www.python.org/downloads/) (pip3 comes with python3 download)  
+All required packages for the virutal environment can be found in doc/requirements.txt.
 
 ### Run the project:
 1. Create a virtual environment with `python3 -m venv <virtual-environment-name>`.
