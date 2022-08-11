@@ -18,8 +18,9 @@ All required packages for the virutal environment can be found in doc/requiremen
 1. Create a virtual environment with `python3 -m venv <virtual-environment-name>`.
 2. Use `<virtual-environment-name>/Scripts/activate` to activate your virtual environment. <br> Use `source <virtual-environment-name>/Scripts/activate` if you are using Git Bash.
 3. Clone this project and `cd` into the cloned repository.
-4. Use `python3 app.py` to run the project on your local host.
-5. Go to the url listed as the local host.  
+4. Use `pip3 install -r doc/requirements.txt` to install all necessary packages.
+5. Use `python3 app.py` to run the project on your local host.
+6. Go to the url listed as the local host.  
 
 ## To-do
 - Fix/improve 50 lowest confirmed cases country graph on the homepage.
