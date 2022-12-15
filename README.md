@@ -1,3 +1,5 @@
+![web-app](https://github.com/b-chen00/CovidStats/actions/workflows/build.yaml/badge.svg)
+
 # Project CovidStats
 
 ## Summary/Description
