@@ -14,7 +14,7 @@ def stats():
     allCountries = []
     count = 186
     # reads the csv file to get a list of all countries.
-    with open("static/data/countries-aggregated.csv", newline="") as csvfile:
+    with open("web-app/static/data/countries-aggregated.csv", newline="") as csvfile:
         content = csv.reader(csvfile,delimiter=",")
         for row in content:
             if (count != 0):
@@ -30,7 +30,7 @@ def compare():
     allCountries = []
     count = 186
     # reads the csv file to get a list of all countries.
-    with open("static/data/countries-aggregated.csv", newline="") as csvfile:
+    with open("web-app/static/data/countries-aggregated.csv", newline="") as csvfile:
         content = csv.reader(csvfile,delimiter=",")
         for row in content:
             if (count != 0):
